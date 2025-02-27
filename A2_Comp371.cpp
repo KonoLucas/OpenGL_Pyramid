@@ -4,11 +4,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
-
 // 坐标系：向上的是z轴
-
-
-// 添加颜色输入并传递到片段着色器
+// 修改后的顶点着色器，添加颜色输入并传递到片段着色器
 const char* vertexShaderSource = R"glsl(
     #version 330 core
     layout (location = 0) in vec3 aPos;
@@ -21,7 +18,7 @@ const char* vertexShaderSource = R"glsl(
     }
 )glsl";
 
-// 使用顶点颜色
+// 修改后的片段着色器，使用顶点颜色
 const char* fragmentShaderSource = R"glsl(
     #version 330 core
     in vec3 vertexColor; // 从顶点着色器接收颜色
@@ -31,8 +28,9 @@ const char* fragmentShaderSource = R"glsl(
     }
 )glsl";
 
-// processInput 函数以处理 W、S、A、D 键
-void processInput(GLFWwindow* window, glm::vec3& translation, float& rotationAngle, bool& rotationPending) {
+// 修改 processInput 函数以处理 W、S、A、D 键
+void processInput(GLFWwindow* window, glm::vec3& translation, float& rotationAngle,
+    bool& rotationPending,float& scaleZ) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
@@ -65,9 +63,22 @@ void processInput(GLFWwindow* window, glm::vec3& translation, float& rotationAng
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE) {
         rotationPending = false;
     }
+
+    // 按 R 键 -> 在 +z 方向缩放
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+        scaleZ += 0.001f; // 增加缩放因子（更小的增量）
+        if (scaleZ > 5.0f) scaleZ = 5.0f; // 限制最大值
+    }
+
+    // 按 F 键 -> 在 -z 方向缩放
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+        scaleZ -= 0.001f; // 减少缩放因子（更小的增量）
+        if (scaleZ < 0.1f) scaleZ = 0.1f; // 限制最小值
+    }
 }
+
 int main() {
-    // initialize the window
+    // 初始化 GLFW 和窗口（保持不变）
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;
         return -1;
@@ -169,12 +180,19 @@ int main() {
 
     // 启用深度测试以正确显示 3D 形状
     glEnable(GL_DEPTH_TEST);
+    // 定义平移向量
+    glm::vec3 translation(0.0f, 0.0f, 0.0f);
+    float rotationAngle = 0.0f;//旋转角度
+    const float rotationSpeed = 50.0f;
+    bool rotationPending = false;
+    float scaleZ = 1.0f; // 初始缩放因子
+    float lastFrame = 0.0f; // 记录上一帧时间
     // 渲染循环
     while (!glfwWindowShouldClose(window)) {
         //float currentFrame = glfwGetTime();
         //float deltaTime = currentFrame - lastFrame; // 计算时间差
         //lastFrame = currentFrame;
-        processInput(window, translation, rotationAngle, rotationPending);
+        processInput(window, translation, rotationAngle, rotationPending,scaleZ);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 清除深度缓冲区
@@ -185,7 +203,7 @@ int main() {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, translation); // 应用平移
         model = glm::rotate(model, rotationAngle, glm::vec3(0.0f, 0.0f, 1.0f)); // 绕Z轴旋转
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, scaleZ));
 
         glm::mat4 view = glm::lookAt(
             glm::vec3(2.0f, 2.0f, 2.0f), // 相机位置
