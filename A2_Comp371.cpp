@@ -5,7 +5,10 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-// 修改后的顶点着色器，添加颜色输入并传递到片段着色器
+// 坐标系：向上的是z轴
+
+
+// 添加颜色输入并传递到片段着色器
 const char* vertexShaderSource = R"glsl(
     #version 330 core
     layout (location = 0) in vec3 aPos;
@@ -18,7 +21,7 @@ const char* vertexShaderSource = R"glsl(
     }
 )glsl";
 
-// 修改后的片段着色器，使用顶点颜色
+// 使用顶点颜色
 const char* fragmentShaderSource = R"glsl(
     #version 330 core
     in vec3 vertexColor; // 从顶点着色器接收颜色
@@ -28,13 +31,43 @@ const char* fragmentShaderSource = R"glsl(
     }
 )glsl";
 
-void processInput(GLFWwindow* window) {
+// processInput 函数以处理 W、S、A、D 键
+void processInput(GLFWwindow* window, glm::vec3& translation, float& rotationAngle, bool& rotationPending) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-}
 
+    const float moveSpeed = 0.001f; // 移动速度
+    const float rotationSpeed = glm::radians(30.0f); // 旋转速度（30度转弧度）
+    // W: 前移 (Z 轴负方向), S: 后移 (Z 轴正方向), A: 左移 (X 轴负方向), D: 右移 (X 轴正方向)
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        translation.z -= moveSpeed; // 前移
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        translation.z += moveSpeed; // 后移
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        translation.x -= moveSpeed; // 左移
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        translation.x += moveSpeed; // 右移
+
+
+     // 按 Q 键 -> 逆时针旋转 30°（但确保只执行一次）
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && !rotationPending) {
+        rotationAngle -= 30.0f;
+        rotationPending = true; // 标记已旋转，避免重复执行
+    }
+
+    // 按 E 键 -> 顺时针旋转 30°（但确保只执行一次）
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS && !rotationPending) {
+        rotationAngle += 30.0f;
+        rotationPending = true; // 标记已旋转，避免重复执行
+    }
+
+    // 当按键释放时，重置 rotationPending，允许下次旋转
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE) {
+        rotationPending = false;
+    }
+}
 int main() {
-    // 初始化 GLFW 和窗口（保持不变）
+    // initialize the window
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;
         return -1;
@@ -136,10 +169,12 @@ int main() {
 
     // 启用深度测试以正确显示 3D 形状
     glEnable(GL_DEPTH_TEST);
-
     // 渲染循环
     while (!glfwWindowShouldClose(window)) {
-        processInput(window);
+        //float currentFrame = glfwGetTime();
+        //float deltaTime = currentFrame - lastFrame; // 计算时间差
+        //lastFrame = currentFrame;
+        processInput(window, translation, rotationAngle, rotationPending);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 清除深度缓冲区
@@ -148,8 +183,8 @@ int main() {
 
         // 创建变换矩阵（包含投影）
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-        model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::translate(model, translation); // 应用平移
+        model = glm::rotate(model, rotationAngle, glm::vec3(0.0f, 0.0f, 1.0f)); // 绕Z轴旋转
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 
         glm::mat4 view = glm::lookAt(
