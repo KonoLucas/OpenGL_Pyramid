@@ -1,0 +1,42 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "C/C++: g++.exe build active file",
+            "command": "C:\\mingw-w64\\mingw64\\bin\\g++.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "p2.cpp",
+                "-o",
+                "p2.exe",
+                "-I",
+                "${workspaceFolder}/libs/glew/include",
+                "-I",
+                "${workspaceFolder}/libs/glfw/include",
+                "-I",
+                "${workspaceFolder}/libs",
+                "-L",
+                "${workspaceFolder}/libs/glew/lib",
+                "-L",
+                "${workspaceFolder}/libs/glfw/lib-mingw-w64",
+                "-lglfw3",
+                "-lglew32",
+                "-lopengl32",
+                "-lgdi32"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Updated build task for OpenGL Pyramid."
+        }
+    ]
+}
