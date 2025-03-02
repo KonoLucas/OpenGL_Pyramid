@@ -189,7 +189,7 @@ int main() {
 
         // Calculate transformation matrix
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, objectPosition); // 使用 objectPosition 进行平移
+        model = glm::translate(model, objectPosition); //for movement along x and y
         model = glm::translate(model, glm::vec3(0.0f, 0.4f, 0.0f)); 
         model = glm::rotate(model, rotationAngle, glm::vec3(0.0f, 1.0f, 0.0f)); 
         model = glm::translate(model, glm::vec3(0.0f, -0.4f, 0.0f)); 
