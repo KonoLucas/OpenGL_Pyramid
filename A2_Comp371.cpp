@@ -1,4 +1,9 @@
-﻿#include <GL/glew.h>
+﻿// Assignment 2
+// Team members: 1. Hui Zhang 40170679
+//               2. Zexu Hao 40233332
+//               3. Mingming Zhang 40258080
+
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
