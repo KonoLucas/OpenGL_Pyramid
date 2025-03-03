@@ -36,16 +36,22 @@ void processInput(GLFWwindow* window, glm::vec3& translation, float& rotationAng
 
     const float moveSpeed = 0.001f; // 移动速度
     const float rotationSpeed = glm::radians(30.0f); // 旋转速度（30度转弧度）
-    // W: 前移 (Z 轴负方向), S: 后移 (Z 轴正方向), A: 左移 (X 轴负方向), D: 右移 (X 轴正方向)
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        translation.z -= moveSpeed; // 前移
+        translation.z += moveSpeed; 
+        
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        translation.z += moveSpeed; // 后移
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        translation.x -= moveSpeed; // 左移
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        translation.x += moveSpeed; // 右移
+        translation.z -= moveSpeed; 
+    
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        translation.x += moveSpeed; 
+        translation.y -= moveSpeed;
+    }
 
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        translation.x -= moveSpeed; 
+        translation.y += moveSpeed;
+    }
+    
 
      // 按 Q 键 -> 逆时针旋转 30°（但确保只执行一次）
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && !rotationPending) {
